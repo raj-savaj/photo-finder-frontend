@@ -1,1 +1,32 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles (src/styles.css). Fonts are loaded in index.html. */
+
+:root {
+  --peacock: #0e4d4a;      /* primary ink + headings */
+  --peacock-deep: #083331;
+  --marigold: #e8a317;     /* the one bright accent: capture ring + main button */
+  --paper: #f7f8f6;        /* page */
+  --mist: #dfe7e4;         /* empty states, borders */
+  --ink: #1c2321;
+  --muted: #56625f;
+  --danger: #a3261c;
+
+  --display: 'Marcellus', 'Cormorant Garamond', Georgia, serif;
+  --body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; min-height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.55 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

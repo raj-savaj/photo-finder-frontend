@@ -1,0 +1,106 @@
+<main class="page" [class.page--results]="stage() === 'results'">
+
+  @if (stage() !== 'results') {
+    <section class="finder">
+      <header class="intro">
+        <p class="event">Niru &amp; Raj’s wedding</p>
+        <h1>Find every photo you’re in</h1>
+        <p class="lede">Take a selfie and we’ll pull your photos from the wedding album.</p>
+      </header>
+
+      <div class="frame" [class.frame--busy]="stage() === 'searching'">
+        @switch (stage()) {
+          @case ('camera') {
+            <video #video class="frame__media frame__media--mirror" playsinline muted autoplay
+                   aria-label="Camera preview"></video>
+          }
+          @case ('start') {
+            <div class="frame__empty" aria-hidden="true">
+              <svg viewBox="0 0 64 64" width="64" height="64">
+                <circle cx="32" cy="26" r="11" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                <path d="M12 54c3-10 11-15 20-15s17 5 20 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+          }
+          @default {
+            @if (selfieUrl(); as url) {
+              <img class="frame__media" [src]="url" alt="Your selfie">
+            }
+          }
+        }
+      </div>
+
+      @if (error(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      <div class="actions">
+        @switch (stage()) {
+          @case ('start') {
+            <button class="btn btn--primary" type="button" (click)="startCamera()">Take a selfie</button>
+            <button class="btn btn--quiet" type="button" (click)="fileInput.click()">Upload a photo</button>
+            <input #fileInput type="file" accept="image/*" (change)="onFilePicked($event)" hidden>
+          }
+          @case ('camera') {
+            <button class="btn btn--primary" type="button" (click)="capture()">Take photo</button>
+            <button class="btn btn--quiet" type="button" (click)="startOver()">Cancel</button>
+          }
+          @case ('preview') {
+            <button class="btn btn--primary" type="button" (click)="findPhotos()">Find my photos</button>
+            <button class="btn btn--quiet" type="button" (click)="retake()">Retake</button>
+          }
+          @case ('searching') {
+            <p class="status" aria-live="polite">Looking through the album…</p>
+          }
+        }
+      </div>
+
+      @if (stage() === 'camera') {
+        <p class="hint">Face the camera in good light. Take off sunglasses.</p>
+      }
+    </section>
+  }
+
+  @if (stage() === 'results') {
+    <section class="results">
+      <header class="results__head">
+        @if (selfieUrl(); as url) {
+          <img class="results__selfie" [src]="url" alt="Your selfie">
+        }
+        <div>
+          @if (results().length) {
+            <h1>{{ results().length }} {{ results().length === 1 ? 'photo' : 'photos' }} of you</h1>
+            <p class="lede">Tap a photo to see it larger.</p>
+          } @else {
+            <h1>No photos matched</h1>
+            <p class="lede">Try another selfie facing the camera in bright light, without sunglasses or a mask.</p>
+          }
+        </div>
+        <button class="btn btn--quiet results__again" type="button" (click)="retake()">Search again</button>
+      </header>
+
+      @if (results().length) {
+        <ul class="grid">
+          @for (m of results(); track m.fileId) {
+            <li>
+              <button class="grid__item" type="button" (click)="open.set(m)" [attr.aria-label]="'View ' + m.fileName">
+                <img [src]="thumb(m)" [alt]="m.fileName" loading="lazy" (error)="onThumbError($event)">
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  @if (open(); as m) {
+    <div class="viewer" role="dialog" aria-modal="true" [attr.aria-label]="m.fileName" (click)="closeViewer()">
+      <img [src]="thumb(m, 1600)" [alt]="m.fileName" (click)="$event.stopPropagation()">
+      <div class="viewer__bar" (click)="$event.stopPropagation()">
+        <span>{{ m.fileName }}</span>
+        <a [href]="thumb(m, 1600)" target="_blank" rel="noopener">Open full size</a>
+        <button type="button" (click)="closeViewer()">Close</button>
+      </div>
+    </div>
+  }
+</main>
